@@ -5,11 +5,23 @@ find_package (Qt5 COMPONENTS Core Network Qml Gui Quick REQUIRED)
 
 include(FindPkgConfig)
 pkg_search_module(SAILFISH sailfishapp REQUIRED)
+pkg_search_module(OPENSSL openssl REQUIRED)
+
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-add_executable(moonlight-sfos src/moonlight-sfos.cpp)
+add_subdirectory(src/moonlight-common-c)
+
+add_executable(moonlight-sfos
+    src/moonlight-sfos.cpp
+    $<TARGET_OBJECTS:enet>
+    $<TARGET_OBJECTS:moonlight-common-c>
+    )
 target_compile_definitions(moonlight-sfos PRIVATE
     $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>
 )
@@ -19,7 +31,9 @@ target_include_directories(moonlight-sfos PRIVATE
 >)
 target_link_libraries(moonlight-sfos
     Qt5::Quick
+    Threads::Threads
     ${SAILFISH_LDFLAGS}
+    ${OPENSSL_LDFLAGS}
 )
 
 install(TARGETS moonlight-sfos
@@ -48,30 +62,19 @@ install(FILES icons/172x172/moonlight-sfos.png
     DESTINATION share/icons/hicolor/172x172/apps
 )
 
-# Get the other files reachable from the project tree in Qt Creator
 FILE(GLOB TsFiles "translations/*.ts")
 add_custom_target(distfiles
     SOURCES
         moonlight-sfos.desktop
         qml/moonlight-sfos.qml
         qml/cover/CoverPage.qml
-        qml/pages/FirstPage.qml
-        qml/pages/SecondPage.qml
+        qml/pages/Main.qml
+        qml/pages/About.qml
+        qml/pages/Settings.qml
+        qml/dialogs/PairDialog.qml
         rpm/moonlight-sfos.spec
-        rpm/moonlight-sfos.yaml
         ${TsFiles})
 
-# Tell Qt Creator where the application executable(s) would be located on the
-# device.
-#
-# It is not necessary to list other deployables than executables (runtime
-# targets) here. The deployment process of Sailfish OS projects is opaque to
-# Qt Creator and the information contained in QtCreatorDeployment.txt is only
-# used to locate the executable associated with the active run configuration
-# on the device in order to run it.
-#
-# Search the Qt Creator Manual to learn about the QtCreatorDeployment.txt file
-# format.
 file(WRITE "${CMAKE_BINARY_DIR}/QtCreatorDeployment.txt"
     "${CMAKE_INSTALL_PREFIX}
 ${CMAKE_BINARY_DIR}/moonlight-sfos:bin
