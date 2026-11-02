@@ -6,13 +6,13 @@
 class PairingClient : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QString pin MEMBER m_pin NOTIFY pinChanged)
-    Q_PROPERTY(QString status MEMBER m_status NOTIFY statusChanged)
-    Q_PROPERTY(bool busy MEMBER m_busy NOTIFY busyChanged)
-    Q_PROPERTY(QStringList hosts MEMBER m_hosts NOTIFY hostsChanged)
-    Q_PROPERTY(QStringList apps MEMBER m_apps NOTIFY appsChanged)
-    Q_PROPERTY(QString appsStatus MEMBER m_appsStatus NOTIFY appsStatusChanged)
-    Q_PROPERTY(bool appsBusy MEMBER m_appsBusy NOTIFY appsBusyChanged)
+    Q_PROPERTY(QString pin MEMBER _pin NOTIFY pinChanged)
+    Q_PROPERTY(QString status MEMBER _status NOTIFY statusChanged)
+    Q_PROPERTY(bool busy MEMBER _busy NOTIFY busyChanged)
+    Q_PROPERTY(QStringList hosts MEMBER _hosts NOTIFY hostsChanged)
+    Q_PROPERTY(QStringList apps MEMBER _apps NOTIFY appsChanged)
+    Q_PROPERTY(QString appsStatus MEMBER _appsStatus NOTIFY appsStatusChanged)
+    Q_PROPERTY(bool appsBusy MEMBER _appsBusy NOTIFY appsBusyChanged)
 
 public:
     explicit PairingClient(QObject *parent = nullptr);
@@ -31,12 +31,18 @@ signals:
     void appsBusyChanged();
 
 private:
-    QString m_pin;
-    QString m_status;
-    bool m_busy = false;
-    QStringList m_hosts;
-    QStringList m_apps;
-    QString m_appsStatus;
-    bool m_appsBusy = false;
-    int m_appsGeneration = 0;
+    static QString appDataPath();
+    static QString hostsFilePath();
+    static QString makePin();
+    void loadHosts();
+    void saveHosts() const;
+
+    QString _pin;
+    QString _status;
+    bool _busy = false;
+    QStringList _hosts;
+    QStringList _apps;
+    QString _appsStatus;
+    bool _appsBusy = false;
+    int _appsGeneration = 0;
 };

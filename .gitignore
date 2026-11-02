@@ -1,15 +1,1 @@
-microtube.pro.user*
 CMakeLists.txt.user*
-js/node_modules
-moonlight-sfos
-Makefile
-*.txt
-*.list
-cmake_install.cmake
-rpms/
-CMakeFiles
-src/moonlight-common-cmake
-mocs_compilation.cpp
-src/moonlight-common-c
-*.a
-moc_*.cpp
