@@ -8,16 +8,16 @@ pkg_search_module(SAILFISH sailfishapp REQUIRED)
 pkg_search_module(OPENSSL openssl REQUIRED)
 pkg_search_module(CURL libcurl REQUIRED)
 pkg_search_module(EXPAT expat REQUIRED)
-pkg_search_module(UUID uuid REQUIRED)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+set(ENET_NO_INSTALL ON CACHE BOOL "" FORCE)
 add_subdirectory(src/moonlight-common-c)
 
 add_library(gamestream STATIC
@@ -25,26 +25,28 @@ add_library(gamestream STATIC
     src/moonlight-embedded/libgamestream/http.c
     src/moonlight-embedded/libgamestream/mkcert.c
     src/moonlight-embedded/libgamestream/xml.c
+    src/compat/uuid.c
 )
 target_include_directories(gamestream PUBLIC
     src/moonlight-embedded/libgamestream
     src/moonlight-common-c/src
 )
-target_include_directories(gamestream PRIVATE
+target_include_directories(gamestream BEFORE PRIVATE
+    src/compat
     ${OPENSSL_INCLUDE_DIRS}
     ${CURL_INCLUDE_DIRS}
     ${EXPAT_INCLUDE_DIRS}
-    ${UUID_INCLUDE_DIRS}
 )
 target_link_libraries(gamestream PUBLIC
     ${CURL_LDFLAGS}
     ${EXPAT_LDFLAGS}
-    ${UUID_LDFLAGS}
     ${OPENSSL_LDFLAGS}
 )
 
 add_executable(moonlight-sfos
     src/moonlight-sfos.cpp
+    src/gamestreamserver.cpp
+    src/gamestreamserver.h
     src/pairingclient.cpp
     src/pairingclient.h
     $<TARGET_OBJECTS:enet>
