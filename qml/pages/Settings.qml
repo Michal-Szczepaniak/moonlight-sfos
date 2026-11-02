@@ -1,43 +1,29 @@
-
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
 Page {
-    id: page
-
     allowedOrientations: Orientation.All
 
     SilicaFlickable {
         anchors.fill: parent
-        flickableDirection: Flickable.VerticalFlick
+        contentHeight: column.height
 
-        PullDownMenu {
-            MenuItem {
-                text: qsTr("About")
-                onClicked: {
-                    pageStack.push(Qt.resolvedUrl("About.qml"))
-                }
+        Column {
+            id: column
+            width: parent.width
+            spacing: Theme.paddingLarge
+
+            PageHeader {
+                title: qsTr("Settings")
             }
 
-            MenuItem {
-                text: qsTr("Settings")
-                onClicked: {
-                    pageStack.push(Qt.resolvedUrl("Settings.qml"))
-                }
+            Button {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: qsTr("Wipe all data and exit")
+                onClicked: remorse.execute(qsTr("Wiping all data"), function() { pairing.wipe() })
             }
-
-            MenuItem {
-                text: qsTr("Pair")
-                onClicked: {
-                    pageStack.push(Qt.resolvedUrl("../dialogs/PairDialog.qml"))
-                }
-            }
-        }
-
-
-        PageHeader {
-            id: header
-            title: qsTr("Computers")
         }
     }
+
+    RemorsePopup { id: remorse }
 }

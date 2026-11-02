@@ -11,7 +11,10 @@ BuildRequires:  pkgconfig(sailfishapp) >= 1.0.2
 BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5Qml)
 BuildRequires:  pkgconfig(Qt5Quick)
-BuildRequires:  openssl-static
+BuildRequires:  openssl-devel
+BuildRequires:  pkgconfig(libcurl)
+BuildRequires:  pkgconfig(expat)
+BuildRequires:  pkgconfig(uuid)
 BuildRequires:  desktop-file-utils
 BuildRequires:  cmake
 
@@ -28,7 +31,7 @@ Moonlight client for SailfishOS
 %install
 %make_install
 
-rm -rf %{buildroot}%{_includedir}/enet %{buildroot}%{_libdir}/static/libenet.a
+rm -rf %{buildroot}%{_includedir}/enet %{buildroot}/usr/lib/static/libenet.a
 
 desktop-file-install --delete-original         --dir %{buildroot}%{_datadir}/applications                %{buildroot}%{_datadir}/applications/*.desktop
 
