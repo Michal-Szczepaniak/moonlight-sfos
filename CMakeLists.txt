@@ -1,11 +1,14 @@
-project(moonlight-sfos CXX)
 cmake_minimum_required(VERSION 3.5)
+project(moonlight-sfos C CXX)
 
 find_package (Qt5 COMPONENTS Core Network Qml Gui Quick REQUIRED)
 
 include(FindPkgConfig)
 pkg_search_module(SAILFISH sailfishapp REQUIRED)
 pkg_search_module(OPENSSL openssl REQUIRED)
+pkg_search_module(CURL libcurl REQUIRED)
+pkg_search_module(EXPAT expat REQUIRED)
+pkg_search_module(UUID uuid REQUIRED)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
@@ -17,8 +20,33 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_subdirectory(src/moonlight-common-c)
 
+add_library(gamestream STATIC
+    src/moonlight-embedded/libgamestream/client.c
+    src/moonlight-embedded/libgamestream/http.c
+    src/moonlight-embedded/libgamestream/mkcert.c
+    src/moonlight-embedded/libgamestream/xml.c
+)
+target_include_directories(gamestream PUBLIC
+    src/moonlight-embedded/libgamestream
+    src/moonlight-common-c/src
+)
+target_include_directories(gamestream PRIVATE
+    ${OPENSSL_INCLUDE_DIRS}
+    ${CURL_INCLUDE_DIRS}
+    ${EXPAT_INCLUDE_DIRS}
+    ${UUID_INCLUDE_DIRS}
+)
+target_link_libraries(gamestream PUBLIC
+    ${CURL_LDFLAGS}
+    ${EXPAT_LDFLAGS}
+    ${UUID_LDFLAGS}
+    ${OPENSSL_LDFLAGS}
+)
+
 add_executable(moonlight-sfos
     src/moonlight-sfos.cpp
+    src/pairingclient.cpp
+    src/pairingclient.h
     $<TARGET_OBJECTS:enet>
     $<TARGET_OBJECTS:moonlight-common-c>
     )
@@ -30,10 +58,10 @@ target_include_directories(moonlight-sfos PRIVATE
     ${SAILFISH_INCLUDE_DIRS}
 >)
 target_link_libraries(moonlight-sfos
+    gamestream
     Qt5::Quick
     Threads::Threads
     ${SAILFISH_LDFLAGS}
-    ${OPENSSL_LDFLAGS}
 )
 
 install(TARGETS moonlight-sfos
@@ -69,6 +97,7 @@ add_custom_target(distfiles
         qml/moonlight-sfos.qml
         qml/cover/CoverPage.qml
         qml/pages/Main.qml
+        qml/pages/Apps.qml
         qml/pages/About.qml
         qml/pages/Settings.qml
         qml/dialogs/PairDialog.qml
